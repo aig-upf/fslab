@@ -1,0 +1,13 @@
+lab>=4.2
+
+[dev]
+pytest
+tox
+pytest-cov
+mypy
+
+[test]
+pytest
+tox
+pytest-cov
+mypy

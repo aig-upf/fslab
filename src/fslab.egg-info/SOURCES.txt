@@ -1,7 +1,0 @@
-README.md
-setup.py
-src/fslab.egg-info/PKG-INFO
-src/fslab.egg-info/SOURCES.txt
-src/fslab.egg-info/dependency_links.txt
-src/fslab.egg-info/requires.txt
-src/fslab.egg-info/top_level.txt

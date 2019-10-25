@@ -19,6 +19,12 @@ class UPFSlurmEnvironment(SlurmEnvironment):
     # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     DEFAULT_MEMORY_PER_CPU = '7950M'  # see http://issues.fast-downward.org/issue733 for a discussion on this
 
+    def __init__(self, **kwargs):
+        kwargs['extra_options'] = kwargs.get('extra_options',
+                                             '### Force the broadwell architecture\n#SBATCH --constraint="bdw"')
+        super().__init__(**kwargs)
+
+
 
 # A hack to force the sourcing of the virtual environment the script has been invoked from
 # upon execution of the SBATCH script

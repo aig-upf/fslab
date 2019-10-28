@@ -19,9 +19,14 @@ class UPFSlurmEnvironment(SlurmEnvironment):
     # infai_1 nodes have 61964 MiB and 16 cores => 3872.75 MiB per core
     DEFAULT_MEMORY_PER_CPU = '7950M'  # see http://issues.fast-downward.org/issue733 for a discussion on this
 
-    def __init__(self, **kwargs):
-        kwargs['extra_options'] = kwargs.get('extra_options',
-                                             '### Force the broadwell architecture\n#SBATCH --constraint="bdw"')
+    def __init__(self, time_limit=None, **kwargs):
+        # Add some extra options that we want by default in the UPF cluster experiments
+        default_extras = ['### Force the broadwell architecture\n#SBATCH --constraint="bdw"']
+        if time_limit is not None:
+            default_extras.append('### Max. CPU time\n#SBATCH --time={}'.format(time_limit))
+
+        kwargs['extra_options'] = kwargs.get('extra_options', 'n'.join(default_extras))
+
         super().__init__(**kwargs)
 
 

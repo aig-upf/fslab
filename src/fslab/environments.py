@@ -25,7 +25,7 @@ class UPFSlurmEnvironment(SlurmEnvironment):
         if time_limit is not None:
             default_extras.append('### Max. CPU time\n#SBATCH --time={}'.format(time_limit))
 
-        kwargs['extra_options'] = kwargs.get('extra_options', 'n'.join(default_extras))
+        kwargs['extra_options'] = kwargs.get('extra_options', '\n'.join(default_extras))
 
         super().__init__(**kwargs)
 

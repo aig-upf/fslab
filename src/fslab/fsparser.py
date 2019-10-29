@@ -29,15 +29,16 @@ def parse_json_attributes(content, props):
 def error(content, props):
     props['error'] = 'plan-found' if props['planner_exit_code'] == 0 else 'unsolvable-or-error'
 
-
-def coverage(content, props):
-    props['coverage'] = int(props['planner_exit_code'] == 0)
+# This would be ideal, but ATM the planner is very unreliable with exit codes
+# def coverage(content, props):
+#     props['coverage'] = int(props['planner_exit_code'] == 0)
 
 
 def parse_results(content, props):
     out = props['json_output']
     if out == 'not-found':
         props['error'] = 'json-output-not-found'
+        props['coverage'] = 0
         return
 
     # Else we assume the json output contains all attributes
@@ -90,7 +91,7 @@ class FSOutputParser(Parser):
 
         self.add_function(parse_json_attributes, file="results.json")
         self.add_function(error)
-        self.add_function(coverage)
+        # self.add_function(coverage)
         self.add_function(parse_results, file="results.json")
         self.add_function(check_min_values, file="results.json")
 

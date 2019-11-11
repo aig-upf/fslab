@@ -30,7 +30,6 @@ class UPFSlurmEnvironment(SlurmEnvironment):
         super().__init__(**kwargs)
 
 
-
 # A hack to force the sourcing of the virtual environment the script has been invoked from
 # upon execution of the SBATCH script
 venv = os.getenv('VIRTUAL_ENV', None)

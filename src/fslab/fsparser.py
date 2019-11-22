@@ -5,6 +5,8 @@ Regular expressions and methods for parsing the output of FS experiments.
 
 from __future__ import division
 
+import re
+
 
 from lab.parser import Parser
 
@@ -34,6 +36,14 @@ def error(content, props):
 #     props['coverage'] = int(props['planner_exit_code'] == 0)
 
 
+def parse_node_generation_rate(content, props):
+    # We do a first parse of the online-printed generation rate, in case it exists,
+    # but will overwrite this later if we found the final value in the JSON output.
+    allrates = re.findall(r'generations \(nodes/sec\.\): (.+)\n', content)
+    if allrates:
+        props['node_generation_rate'] = float(allrates[-1])
+
+
 def parse_results(content, props):
     out = props['json_output']
     if out == 'not-found':
@@ -60,6 +70,7 @@ def parse_results(content, props):
         props['generations'] = out['generated']
         props['evaluations'] = out['evaluated']
         props['plan'] = ', '.join(out['plan'])
+        props['node_generation_rate'] = out['gen_per_second']
 
     # TODO This needs to be improved to cover all possible cases
     props['error'] = 'none'
@@ -84,11 +95,13 @@ class FSOutputParser(Parser):
 
         self.add_pattern('node', r'node: (.+)\n', type=str, file='driver.log', required=True)
         self.add_pattern('planner_exit_code', r'run-planner exit code: (.+)\n', type=int, file='driver.log')
+        # self.add_pattern('node_generation_rate', r'generations (nodes/sec.): (.+)\n', type=float, file='driver.log')
 
         # We first parse the output log, in case the JSON file was not created due to some error,
         # then we parse the JSON file if available
         # self.add_function(parse_output_log)
 
+        self.add_function(parse_node_generation_rate, file="driver.log")
         self.add_function(parse_json_attributes, file="results.json")
         self.add_function(error)
         # self.add_function(coverage)

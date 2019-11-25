@@ -55,12 +55,19 @@ def parse_results(content, props):
         return
 
     # If we reach this point, we can assume the json results file contains all attributes
+
+    # Check if there was an OOM error
+    props['out_of_memory'] = bool(out['out_of_memory'])
+    if props['out_of_memory']:
+        props['error'] = 'out-of-memory'
+        return
+
+    # Check if the plan was flagged as invalid
     props['invalid-plan'] = not bool(out['valid'])
     if props['invalid-plan']:
         props['error'] = 'invalid-plan'
         return
 
-    props['out_of_memory'] = bool(out['out_of_memory'])
     props['coverage'] = int(out['solved'])  # i.e. either 1 or 0
     props['unsolvable'] = props['coverage'] == 0 and not props['out_of_memory']
 
@@ -74,10 +81,6 @@ def parse_results(content, props):
         props['evaluations'] = out['evaluated']
         props['plan'] = ', '.join(out['plan'])
         props['node_generation_rate'] = out['gen_per_second']
-
-    # TODO This needs to be improved to cover all possible cases
-    if props['out_of_memory']:
-        props['error'] = 'out-of-memory'
 
 
 def check_min_values(content, props):

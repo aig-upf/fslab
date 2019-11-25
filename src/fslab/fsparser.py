@@ -73,7 +73,7 @@ def parse_results(content, props):
         props['generations'] = out['generated']
         props['evaluations'] = out['evaluated']
         props['plan'] = ', '.join(out['plan'])
-        # props['node_generation_rate'] = out['gen_per_second']
+        props['node_generation_rate'] = out['gen_per_second']
 
     # TODO This needs to be improved to cover all possible cases
     if props['out_of_memory']:

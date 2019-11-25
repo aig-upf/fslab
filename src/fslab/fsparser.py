@@ -15,22 +15,6 @@ def solved(run):
     return run['coverage'] or run['unsolvable']
 
 
-def parse_output_log(content, props):
-    pass
-
-
-def parse_json_attributes(content, props):
-    try:
-        import json
-        props['json_output'] = json.loads(content)
-    except Exception as e:
-        props['json_output'] = 'not-found'
-        props['json_output_error'] = str(e)
-
-
-def error(content, props):
-    props['error'] = 'plan-found' if props['planner_exit_code'] == 0 else 'unsolvable-or-error'
-
 # This would be ideal, but ATM the planner is very unreliable with exit codes
 # def coverage(content, props):
 #     props['coverage'] = int(props['planner_exit_code'] == 0)
@@ -45,13 +29,28 @@ def parse_node_generation_rate(content, props):
 
 
 def parse_results(content, props):
-    out = props['json_output']
-    if out == 'not-found':
-        props['error'] = 'json-output-not-found'
-        props['coverage'] = 0
+    # TODO planner_exit_code is still not too reliable
+    props['error'] = 'none' if props['planner_exit_code'] == 0 else 'unsolvable-or-error'
+
+    props['coverage'] = 0  # Unless proven otherwise, the instance is assumed not solved
+
+    if props['error'] != 'none':
         return
 
-    # Else we assume the json output contains all attributes
+    if not content:
+        props['error'] = 'json-output-is-empty'
+        props['json_output'] = 'not-found'
+        return
+
+    try:
+        import json
+        out = props['json_output'] = json.loads(content)
+    except Exception as e:
+        props['error'] = 'json-output-not-found'
+        props['json_output'] = str(e)
+        return
+
+    # If we reach this point, we can assume the json results file contains all attributes
     props['invalid-plan'] = not bool(out['valid'])
     if props['invalid-plan']:
         props['error'] = 'invalid-plan'
@@ -73,7 +72,6 @@ def parse_results(content, props):
         props['node_generation_rate'] = out['gen_per_second']
 
     # TODO This needs to be improved to cover all possible cases
-    props['error'] = 'none'
     if props['out_of_memory']:
         props['error'] = 'out-of-memory'
 
@@ -90,21 +88,12 @@ def check_min_values(content, props):
 
 class FSOutputParser(Parser):
     def __init__(self):
-        # print('Running FS output parser')
         Parser.__init__(self)
 
         self.add_pattern('node', r'node: (.+)\n', type=str, file='driver.log', required=True)
         self.add_pattern('planner_exit_code', r'run-planner exit code: (.+)\n', type=int, file='driver.log')
-        # self.add_pattern('node_generation_rate', r'generations (nodes/sec.): (.+)\n', type=float, file='driver.log')
-
-        # We first parse the output log, in case the JSON file was not created due to some error,
-        # then we parse the JSON file if available
-        # self.add_function(parse_output_log)
 
         self.add_function(parse_node_generation_rate, file="driver.log")
-        self.add_function(parse_json_attributes, file="results.json")
-        self.add_function(error)
-        # self.add_function(coverage)
         self.add_function(parse_results, file="results.json")
         self.add_function(check_min_values, file="results.json")
 

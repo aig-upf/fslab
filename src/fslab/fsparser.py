@@ -24,8 +24,13 @@ def parse_node_generation_rate(content, props):
     # We do a first parse of the online-printed generation rate, in case it exists,
     # but will overwrite this later if we found the final value in the JSON output.
     allrates = re.findall(r'generations \(nodes/sec\.\): (.+)\n', content)
-    if allrates:
-        props['node_generation_rate'] = float(allrates[-1])
+    props['node_generation_rate'] = float(allrates[-1]) if allrates else '-'
+
+
+def parse_sdd_minimization(content, props):
+    # SDD minimization: 132 -> 101 nodes (30% reduction)
+    allsizes = re.findall(r'SDD minimization: .+ -> ([0-9]+) nodes', content)
+    props['sdd_sizes'] = list(allsizes) if allsizes else '-'
 
 
 def parse_results(content, props):
@@ -39,15 +44,14 @@ def parse_results(content, props):
 
     if not content:
         props['error'] = 'json-output-is-empty'
-        props['json_output'] = 'not-found'
         return
 
     try:
         import json
-        out = props['json_output'] = json.loads(content)
+        out = json.loads(content)
     except Exception as e:
-        props['error'] = 'json-output-not-found'
-        props['json_output'] = str(e)
+        props['error'] = 'json-output-parse-error'
+        props['json-output-parse-error'] = str(e)
         return
 
     # If we reach this point, we can assume the json results file contains all attributes
@@ -69,7 +73,7 @@ def parse_results(content, props):
         props['generations'] = out['generated']
         props['evaluations'] = out['evaluated']
         props['plan'] = ', '.join(out['plan'])
-        props['node_generation_rate'] = out['gen_per_second']
+        # props['node_generation_rate'] = out['gen_per_second']
 
     # TODO This needs to be improved to cover all possible cases
     if props['out_of_memory']:
@@ -93,7 +97,9 @@ class FSOutputParser(Parser):
         self.add_pattern('node', r'node: (.+)\n', type=str, file='driver.log', required=True)
         self.add_pattern('planner_exit_code', r'run-planner exit code: (.+)\n', type=int, file='driver.log')
 
-        self.add_function(parse_node_generation_rate, file="driver.log")
+        self.add_function(parse_node_generation_rate, file="run.log")
+        self.add_function(parse_sdd_minimization, file="run.log")
+
         self.add_function(parse_results, file="results.json")
         self.add_function(check_min_values, file="results.json")
 

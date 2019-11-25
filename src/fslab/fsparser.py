@@ -24,13 +24,13 @@ def parse_node_generation_rate(content, props):
     # We do a first parse of the online-printed generation rate, in case it exists,
     # but will overwrite this later if we found the final value in the JSON output.
     allrates = re.findall(r'generations \(nodes/sec\.\): (.+)\n', content)
-    props['node_generation_rate'] = float(allrates[-1]) if allrates else '-'
+    props['node_generation_rate'] = float(allrates[-1]) if allrates else 0
 
 
 def parse_sdd_minimization(content, props):
     # SDD minimization: 132 -> 101 nodes (30% reduction)
     allsizes = re.findall(r'SDD minimization: .+ -> ([0-9]+) nodes', content)
-    props['sdd_sizes'] = sum(int(x) for x in allsizes) if allsizes else '-1'
+    props['sdd_sizes'] = sum(int(x) for x in allsizes) if allsizes else -1
 
 
 def parse_results(content, props):

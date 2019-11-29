@@ -35,11 +35,11 @@ def parse_sdd_minimization(content, props):
 
 def parse_results(content, props):
     # TODO planner_exit_code is still not too reliable
-    props['error'] = 'none' if props['planner_exit_code'] == 0 else 'unsolvable-or-error'
+    props['error'] = 'all-good' if props['planner_exit_code'] == 0 else 'unsolvable-or-error'
 
     props['coverage'] = 0  # Unless proven otherwise, the instance is assumed not solved
 
-    if props['error'] != 'none':
+    if props['error'] != 'all-good':
         return
 
     if not content:

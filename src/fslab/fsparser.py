@@ -32,6 +32,11 @@ def parse_sdd_minimization(content, props):
     allsizes = re.findall(r'SDD minimization: .+ -> ([0-9]+) nodes', content)
     props['sdd_sizes'] = sum(int(x) for x in allsizes) if allsizes else -1
 
+    # Building SDD for 8 variables and 11 constraints
+    thsizes = re.findall(r'Building SDD for ([0-9]+) variables and ([0-9]+) constraints', content)
+    props['sdd_theory_vars'] = sum(int(x[0]) for x in thsizes) if allsizes else -1
+    props['sdd_theory_constraints'] = sum(int(x[1]) for x in thsizes) if allsizes else -1
+
 
 def parse_results(content, props):
     # TODO planner_exit_code is still not too reliable

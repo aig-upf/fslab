@@ -23,8 +23,28 @@ def solved(run):
 def parse_node_generation_rate(content, props):
     # We do a first parse of the online-printed generation rate, in case it exists,
     # but will overwrite this later if we found the final value in the JSON output.
-    allrates = re.findall(r'generations \(nodes/sec\.\): (.+)\n', content)
+    allrates = re.findall(r'generations \(nodes/sec\.\): (.+). Memory consumption', content)
     props['node_generation_rate'] = float(allrates[-1]) if allrates else 0
+
+
+def parse_memory_watchpoints(content, props):
+    res = re.findall(r'Mem\. usage before match-tree construction: (\d+)kB\. /', content)
+    props['mem_before_mt'] = int(res[-1]) if res else 0
+
+    res = re.findall(r'Mem\. usage on start of SBFWS search: (\d+)kB\. /', content)
+    props['mem_before_search'] = int(res[-1]) if res else 0
+
+
+def parse_grounding_info(content, props):
+    res = re.findall(r'Parsing and simplifying the problem with the ASP-based parser: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)
+    props['asp_prep_time'] = float(res[-1][0]) if res else 0
+    props['asp_prep_mem'] = float(res[-1][1]) if res else 0
+
+    res = re.findall(r'Successor Generator: (.+)$', content)
+    props['successor_generator'] = res[-1] if res else 'unknown'
+
+    res = re.findall(r'Loaded a total of (\d+) reachable ground actions', content)
+    props['num_reach_actions'] = int(res[-1]) if res else 0
 
 
 def parse_sdd_minimization(content, props):
@@ -105,6 +125,8 @@ class FSOutputParser(Parser):
         self.add_pattern('node', r'node: (.+)\n', type=str, file='driver.log', required=True)
         self.add_pattern('planner_exit_code', r'run-planner exit code: (.+)\n', type=int, file='driver.log')
 
+        self.add_function(parse_memory_watchpoints, file="run.log")
+        self.add_function(parse_grounding_info, file="run.log")
         self.add_function(parse_node_generation_rate, file="run.log")
         self.add_function(parse_sdd_minimization, file="run.log")
 

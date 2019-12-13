@@ -46,7 +46,7 @@ def parse_grounding_info(content, props):
     props['asp_prep_time'] = float(res[-1][0]) if res else 0
     props['asp_prep_mem'] = float(res[-1][1]) if res else 0
 
-    res = re.findall(r'Successor Generator: (.+)$', content)
+    res = re.findall(r'Successor Generator: (.+)\n', content)
     props['successor_generator'] = res[-1] if res else 'unknown'
 
     res = re.findall(r'Loaded a total of (\d+) reachable ground actions', content)

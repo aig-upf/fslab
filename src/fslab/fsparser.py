@@ -25,9 +25,9 @@ def parse_node_generation_rate(content, props):
     # but will overwrite this later if we found the final value in the JSON output.
     # [INFO][454.35526] Node generation rate after 5950K generations (nodes/sec.): 13281.5. Memory consumption: 7730092kB. / 7806784 kB.
     allrates = re.findall(r'Node generation rate after (\d+)K generations \(nodes/sec\.\): (.+). Memory consumption: (\d+)kB\.', content)
-    props['node_generation_rate'] = float(allrates[-1][0]) if allrates else 0
+    props['node_generation_rate'] = float(allrates[-1][1]) if allrates else 0
     props['memory'] = float(allrates[-1][2]) if allrates else 0
-    props['last_recorded_generations'] = int(allrates[-1][1]) if allrates else 0
+    props['last_recorded_generations'] = int(allrates[-1][0]) if allrates else 0
 
 
 def parse_memory_time_watchpoints(content, props):

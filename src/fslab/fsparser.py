@@ -27,7 +27,7 @@ def parse_node_generation_rate(content, props):
     allrates = re.findall(r'Node generation rate after (\d+)K generations \(nodes/sec\.\): (.+). Memory consumption: (\d+)kB\.', content)
     props['node_generation_rate'] = float(allrates[-1][1]) if allrates else 0
     props['memory'] = float(allrates[-1][2]) if allrates else 0
-    props['last_recorded_generations'] = int(allrates[-1][0]) if allrates else 0
+    props['last_recorded_generations'] = int(allrates[-1][0])*1000 if allrates else 0
 
 
 def parse_memory_time_watchpoints(content, props):
@@ -51,6 +51,10 @@ def parse_grounding_info(content, props):
 
     res = re.findall(r'Loaded a total of (\d+) reachable ground actions', content)
     props['num_reach_actions'] = int(res[-1]) if res else 0
+
+    # [INFO][ 0.21237] Number of state variables: 68880
+    res = re.findall(r'Number of state variables: (\d+)\n', content)
+    props['num_state_vars'] = int(res[-1]) if res else 0
 
 
 def parse_sdd_minimization(content, props):

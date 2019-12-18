@@ -41,6 +41,14 @@ def parse_memory_time_watchpoints(content, props):
     props['last_recorded_time'] = float(allrates[-1]) if allrates else 0
 
 
+def parse_simulation_info(content, props):
+    res = re.findall(r'Starting IW\(1\) Simulation', content)
+    props['iw1_run'] = int(len(res) > 0)
+
+    res = re.findall(r'Starting IW\(2\) Simulation', content)
+    props['iw2_run'] = int(len(res) > 0)
+
+
 def parse_grounding_info(content, props):
     res = re.findall(r'Parsing and simplifying the problem with the ASP-based parser: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)
     props['asp_prep_time'] = float(res[-1][0]) if res else 0
@@ -141,6 +149,7 @@ class FSOutputParser(Parser):
         self.add_function(parse_grounding_info, file="run.log")
         self.add_function(parse_node_generation_rate, file="run.log")
         self.add_function(parse_sdd_minimization, file="run.log")
+        self.add_function(parse_simulation_info, file="run.log")
 
         self.add_function(parse_results, file="results.json")
         self.add_function(check_min_values, file="results.json")

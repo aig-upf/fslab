@@ -43,10 +43,18 @@ def parse_memory_time_watchpoints(content, props):
 
 def parse_simulation_info(content, props):
     res = re.findall(r'Starting IW\(1\) Simulation', content)
-    props['iw1_run'] = int(len(res) > 0)
+    props['iw1_started'] = int(len(res) > 0)
+
+    res = re.findall(r'Finished IW\(1\) Simulation. Fraction reached subgoals: (.+)\n', content)
+    props['iw1_finished'] = int(len(res) > 0)
+    props['iw1_reached_subgoals'] = float(res[-1]) if res else 0
 
     res = re.findall(r'Starting IW\(2\) Simulation', content)
-    props['iw2_run'] = int(len(res) > 0)
+    props['iw2_started'] = int(len(res) > 0)
+
+    res = re.findall(r'Finished IW\(2\) Simulation. Result: (.+)\n', content)
+    props['iw2_finished'] = int(len(res) > 0)
+    props['iw2_reached_subgoals'] = float(res[-1]) if res else 0
 
 
 def parse_grounding_info(content, props):

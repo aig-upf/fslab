@@ -50,7 +50,7 @@ def parse_simulation_info(content, props):
 
 
 def parse_grounding_info(content, props):
-    res = re.findall(r'Parsing and simplifying the problem with the ASP-based parser: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)
+    res = re.findall(r'Computing reachable groundings: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)
     props['time_reachability'] = float(res[-1][0]) if res else 0
     props['mem_reachability'] = float(res[-1][1]) if res else 0
 

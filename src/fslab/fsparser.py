@@ -51,8 +51,12 @@ def parse_simulation_info(content, props):
 
 def parse_grounding_info(content, props):
     res = re.findall(r'Parsing and simplifying the problem with the ASP-based parser: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)
-    props['asp_prep_time'] = float(res[-1][0]) if res else 0
-    props['asp_prep_mem'] = float(res[-1][1]) if res else 0
+    props['time_reachability'] = float(res[-1][0]) if res else 0
+    props['mem_reachability'] = float(res[-1][1]) if res else 0
+
+    res = re.findall(r'Python parser and preprocessing: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)
+    props['time_frontend'] = float(res[-1][0]) if res else 0
+    props['mem_frontend'] = float(res[-1][1]) if res else 0
 
     res = re.findall(r'Successor Generator: (.+)\n', content)
     props['successor_generator'] = res[-1] if res else 'unknown'
@@ -119,7 +123,8 @@ def parse_results(content, props):
         if 'memory' in out:
             props['memory'] = out['memory']  # Override previous temporary measurements
         props['search_time'] = out['search_time']
-        props['total_time'] = out['total_time']
+        props['time_backend'] = out['time_backend']
+        props['total_time'] = props['time_frontend'] + props['time_backend']
         props['plan_length'] = int(out['plan_length'])
         props['expansions'] = out['expanded']
         props['generations'] = out['generated']

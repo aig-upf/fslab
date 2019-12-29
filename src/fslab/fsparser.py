@@ -52,7 +52,7 @@ def parse_simulation_info(content, props):
     res = re.findall(r'Starting IW\(2\) Simulation', content)
     props['iw2_started'] = int(len(res) > 0)
 
-    res = re.findall(r'Finished IW\(2\) Simulation. Result: (.+)\n', content)
+    res = re.findall(r'Finished IW\(2\) Simulation. Fraction reached subgoals: (.+)\n', content)
     props['iw2_finished'] = int(len(res) > 0)
     props['iw2_reached_subgoals'] = float(res[-1]) if res else 0
 

@@ -49,6 +49,22 @@ def parse_simulation_info(content, props):
     props['iw1_finished'] = int(len(res) > 0)
     props['iw1_reached_subgoals'] = float(res[-1]) if res else 0
 
+    # Simulation - IW(1) run reached all goals
+    res = re.findall(r'Simulation - IW\(1\) run reached all goals\n', content)
+    props['sim_iw1_successful'] = int(len(res) > 0)
+
+    # considered too high to run IW(2)
+    res = re.findall(r'considered too high to run IW\(2\)', content)
+    props['sim_rall_because_too_many_actions'] = int(len(res) > 0)
+
+    # Simulation - IW(2) run reached all goals
+    res = re.findall(r'Simulation - IW\(2\) run reached all goals\n', content)
+    props['sim_iw2_successful'] = not props['sim_iw1_successful'] and int(len(res) > 0)
+
+    # Simulation - IW(2) run did not reach all goals
+    res = re.findall(r'Simulation - IW\(2\) run did not reach all goals', content)
+    props['sim_rall_because_iw2_unsuccessful'] = not props['sim_iw1_successful'] and int(len(res) > 0)
+
     res = re.findall(r'Starting IW\(2\) Simulation', content)
     props['iw2_started'] = int(len(res) > 0)
 

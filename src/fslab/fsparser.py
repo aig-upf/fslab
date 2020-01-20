@@ -50,7 +50,8 @@ def parse_simulation_info(content, props):
     props['iw1_reached_subgoals'] = float(res[-1]) if res else 0
 
     # Simulation - IW(1) run reached all goals
-    res = re.findall(r'Simulation - IW\(1\) run reached all goals\n', content)
+    #  Finished IW(1) Simulation. Fraction reached subgoals: 1.00
+    res = re.findall(r'Finished IW\(1\) Simulation. Fraction reached subgoals: 1\.00\n', content)
     props['sim_iw1_successful'] = int(len(res) > 0)
 
     # considered too high to run IW(2)

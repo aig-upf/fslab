@@ -73,6 +73,9 @@ def parse_simulation_info(content, props):
     props['iw2_finished'] = int(len(res) > 0)
     props['iw2_reached_subgoals'] = float(res[-1]) if res else 0
 
+    res = re.findall(r'Total simulation time: (\d+\.\d+)\n', content)
+    props['total_simulation_time'] = float(res[-1]) if res else 0
+
 
 def parse_grounding_info(content, props):
     res = re.findall(r'Computing reachable groundings: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)

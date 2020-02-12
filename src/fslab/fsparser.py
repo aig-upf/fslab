@@ -79,6 +79,13 @@ def parse_simulation_info(content, props):
     res = re.findall(r'Operators where all preconditions atoms have been reached but whole precondition not: (\d+)/(\d+)\n', content)
     props['iw_precondition_reachability'] = int(res[-1][0])/int(res[-1][1]) if res else 0
 
+    res = re.findall(r'Goal state reached during simulation\n', content)
+    props['sim_goal_reached'] = int(len(res) > 0)
+
+    res = re.findall(r'Total nodes expanded during simulations: (\d+)\n', content)
+    props['sim_nodes_expanded'] = int(res[0]) if res else 0
+
+
 
 def parse_grounding_info(content, props):
     res = re.findall(r'Computing reachable groundings: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)

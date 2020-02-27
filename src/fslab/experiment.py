@@ -62,6 +62,60 @@ class FSRun(FastDownwardRun):
             memory_limit=exp.memory_limit,
         )
 
+    def _build_run_script(self):
+        if not self.commands:
+            logging.critical("Please add at least one command")
+
+        exp_vars = self.experiment._env_vars
+        run_vars = self._env_vars
+        doubly_used_vars = set(exp_vars) & set(run_vars)
+        if doubly_used_vars:
+            logging.critical(
+                "Resource names cannot be shared between experiments "
+                "and runs, they must be unique: {}".format(doubly_used_vars)
+            )
+        env_vars = exp_vars
+        env_vars.update(run_vars)
+        env_vars = self._prepare_env_vars(env_vars)
+
+        def make_call(name, cmd, kwargs):
+            kwargs["name"] = name
+
+            # Support running globally installed binaries.
+            def format_arg(arg):
+                if isinstance(arg, tools.string_type):
+                    try:
+                        return repr(arg.format(**env_vars))
+                    except KeyError as err:
+                        logging.critical("Resource {} is undefined.".format(err))
+                else:
+                    return repr(str(arg))
+
+            def format_key_value_pair(key, val):
+                if isinstance(val, tools.string_type):
+                    formatted_value = format_arg(val)
+                else:
+                    formatted_value = repr(val)
+                return "{}={}".format(key, formatted_value)
+
+            cmd_string = "[{}]".format(", ".join([format_arg(arg) for arg in cmd]))
+            kwargs_string = ", ".join(
+                format_key_value_pair(key, value)
+                for key, value in sorted(kwargs.items())
+            )
+            parts = [cmd_string]
+            if kwargs_string:
+                parts.append(kwargs_string)
+            return "Call({}, **redirects).wait()\n".format(", ".join(parts))
+
+        calls_text = "\n".join(
+            make_call(name, cmd, kwargs)
+            for name, (cmd, kwargs) in self.commands.items()
+        )
+        run_script = tools.fill_template("run.py", calls=calls_text)
+
+        self.add_new_file("", "run", run_script, permissions=0o755)
+
 
 class FSExperiment(FastDownwardExperiment):
     """Conduct a FS experiment. See documentation

@@ -33,6 +33,36 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNWARD_SCRIPTS_DIR = os.path.join(DIR, 'scripts')
 
 
+RUN_TPL = """#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import logging
+import os
+import platform
+
+from fslab.call import Call
+from lab import tools
+
+tools.configure_logging()
+
+logging.info('node: {}'.format(platform.node()))
+
+run_log = open('run.log', 'w')
+run_err = open('run.err', 'w', buffering=1)  # line buffering
+redirects = {'stdout': run_log, 'stderr': run_err}
+
+# Make sure we're in the run directory.
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+%(calls)s
+
+for f in [run_log, run_err]:
+    f.close()
+    if os.path.getsize(f.name) == 0:
+        os.remove(f.name)
+"""
+
+
 class FSRun(FastDownwardRun):
     def __init__(self, exp, algo, task):
         # Note: We surpass the FastDownwardRun constructor to avoid adding the
@@ -112,7 +142,8 @@ class FSRun(FastDownwardRun):
             make_call(name, cmd, kwargs)
             for name, (cmd, kwargs) in self.commands.items()
         )
-        run_script = tools.fill_template("run.py", calls=calls_text)
+        # run_script = tools.fill_template("run.py", calls=calls_text)
+        run_script = RUN_TPL % dict(calls=calls_text)
 
         self.add_new_file("", "run", run_script, permissions=0o755)
 

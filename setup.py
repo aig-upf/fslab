@@ -51,7 +51,7 @@ def main():
 
 
         install_requires=[
-            'lab>=5.1',
+            'lab>=5.3',
         ],
 
         extras_require={

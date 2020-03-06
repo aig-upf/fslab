@@ -25,9 +25,14 @@ def parse_node_generation_rate(content, props):
     # but will overwrite this later if we found the final value in the JSON output.
     # [INFO][454.35526] Node generation rate after 5950K generations (nodes/sec.): 13281.5. Memory consumption: 7730092kB. / 7806784 kB.
     allrates = re.findall(r'Node generation rate after (\d+)K generations \(nodes/sec\.\): (.+). Memory consumption: (\d+)kB\.', content)
+    props['last_recorded_generations'] = int(allrates[-1][0])*1000 if allrates else 0
     props['node_generation_rate'] = float(allrates[-1][1]) if allrates else 0
     props['memory'] = float(allrates[-1][2]) if allrates else 0
-    props['last_recorded_generations'] = int(allrates[-1][0])*1000 if allrates else 0
+
+    # [INFO][1797.70770] IW run: Node generation rate after 31750K generations (nodes/sec.): 17684.4
+    allrates = re.findall(r'IW run: Node generation rate after (\d+)K generations \(nodes/sec\.\): (.+)', content)
+    props['sim_last_recorded_generations'] = int(allrates[-1][0])*1000 if allrates else 0
+    props['sim_node_generation_rate'] = float(allrates[-1][1]) if allrates else 0
 
 
 def parse_memory_time_watchpoints(content, props):
@@ -61,6 +66,7 @@ def parse_simulation_info(content, props):
     # Simulation - IW(2) run reached all goals
     res = re.findall(r'Simulation - IW\(2\) run reached all goals\n', content)
     props['sim_iw2_successful'] = not props['sim_iw1_successful'] and int(len(res) > 0)
+    props['sim_successful'] = props['sim_iw1_successful'] or props['sim_iw2_successful']
 
     # Simulation - IW(2) run did not reach all goals
     res = re.findall(r'Simulation - IW\(2\) run did not reach all goals', content)

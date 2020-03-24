@@ -42,17 +42,17 @@ def parse_memory_time_watchpoints(content, props):
     res = re.findall(r'Mem\. usage on start of SBFWS search: (\d+)kB\. /', content)
     props['mem_before_search'] = int(res[-1]) if res else 0
 
-    allrates = re.findall(r'\[INFO\]\[(\d+\.\d+)\]', content)
+    allrates = re.findall(r'\[INFO\]\[(\s*\d+\.\d+)\]', content)
     props['last_recorded_time'] = float(allrates[-1]) if allrates else 0
 
 
 def parse_simulation_info(content, props):
     res = re.findall(r'Starting IW\(1\) Simulation', content)
-    props['iw1_started'] = int(len(res) > 0)
+    props['sim_iw1_started'] = int(len(res) > 0)
 
     res = re.findall(r'Finished IW\(1\) Simulation. Fraction reached subgoals: (.+)\n', content)
-    props['iw1_finished'] = int(len(res) > 0)
-    props['iw1_reached_subgoals'] = float(res[-1]) if res else 0
+    props['sim_iw1_finished'] = int(len(res) > 0)
+    props['sim_iw1_reached_subgoals'] = float(res[-1]) if res else 0
 
     # Simulation - IW(1) run reached all goals
     #  Finished IW(1) Simulation. Fraction reached subgoals: 1.00
@@ -73,17 +73,17 @@ def parse_simulation_info(content, props):
     props['sim_rall_because_iw2_unsuccessful'] = not props['sim_iw1_successful'] and int(len(res) > 0)
 
     res = re.findall(r'Starting IW\(2\) Simulation', content)
-    props['iw2_started'] = int(len(res) > 0)
+    props['sim_iw2_started'] = int(len(res) > 0)
 
     res = re.findall(r'Finished IW\(2\) Simulation. Fraction reached subgoals: (.+)\n', content)
-    props['iw2_finished'] = int(len(res) > 0)
-    props['iw2_reached_subgoals'] = float(res[-1]) if res else 0
+    props['sim_iw2_finished'] = int(len(res) > 0)
+    props['sim_iw2_reached_subgoals'] = float(res[-1]) if res else 0
 
     res = re.findall(r'Total simulation time: (\d+\.\d+)\n', content)
-    props['total_simulation_time'] = float(res[-1]) if res else 0
+    props['sim_total_simulation_time'] = float(res[-1]) if res else 0
 
     res = re.findall(r'Operators where all preconditions atoms have been reached but whole precondition not: (\d+)/(\d+)\n', content)
-    props['iw_precondition_reachability'] = int(res[-1][0])/int(res[-1][1]) if res else 0
+    props['sim_iw_precondition_reachability'] = int(res[-1][0])/int(res[-1][1]) if res else 0
 
     res = re.findall(r'Goal state reached during simulation\n', content)
     props['sim_goal_reached'] = int(len(res) > 0)
@@ -92,11 +92,10 @@ def parse_simulation_info(content, props):
     props['sim_nodes_expanded'] = int(res[0]) if res else 0
 
 
-
 def parse_grounding_info(content, props):
-    res = re.findall(r'Computing reachable groundings: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)
-    props['time_reachability'] = float(res[-1][0]) if res else 0
-    props['mem_reachability'] = float(res[-1][1]) if res else 0
+    res = re.findall(r'Computing reachable groundings.*: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)
+    props['reach_time'] = float(res[-1][0]) if res else 0
+    props['reach_mem'] = float(res[-1][1]) if res else 0
 
     res = re.findall(r'Python parser and preprocessing: \[(\d+\.\d+)s CPU, .+ wall-clock, diff: (\d+\.\d+)MB, .+\]', content)
     props['time_frontend'] = float(res[-1][0]) if res else 0
@@ -111,6 +110,12 @@ def parse_grounding_info(content, props):
     # [INFO][ 0.21237] Number of state variables: 68880
     res = re.findall(r'Number of state variables: (\d+)\n', content)
     props['num_state_vars'] = int(res[-1]) if res else 0
+
+    res = re.findall(r' Number of action schemata: (\d+)\n', content)
+    props['num_action_schemas'] = int(res[-1]) if res else 0
+
+    res = re.findall(r'Number of \(perhaps partially\) ground actions: (\d+)\n', content)
+    props['num_ground_actions'] = int(res[-1]) if res else 0
 
 
 def parse_sdd_minimization(content, props):

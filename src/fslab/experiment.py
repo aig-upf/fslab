@@ -84,7 +84,7 @@ class FSRun(FastDownwardRun):
         # TODO will be executed from the run directory. Perhaps cleaner options are available
         # TODO that don't mix the workspace with other important LAB files?
         self.add_command(
-            'fs',
+            'planner',
             ['{' + algo.cached_revision.get_planner_resource_name() + '}'] +
             algo.driver_options + ['--domain', '{domain}', '--instance', '{problem}', '--output', '.']
             + algo.component_options,

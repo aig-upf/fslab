@@ -23,6 +23,10 @@ class UPFSlurmEnvironment(SlurmEnvironment):
         # Add some extra options that we want by default in the UPF cluster experiments
         default_extras = ['### Force the broadwell architecture\n#SBATCH --constraint="bdw"']
         if time_limit is not None:
+            # From https://slurm.schedmd.com/sbatch.html:
+            # A time limit of zero requests that no time limit be imposed. Acceptable time formats include "minutes",
+            # "minutes:seconds", "hours:minutes:seconds", "days-hours", "days-hours:minutes" and
+            # "days-hours:minutes:seconds".
             default_extras.append('### Max. CPU time\n#SBATCH --time={}'.format(time_limit))
 
         kwargs['extra_options'] = kwargs.get('extra_options', '\n'.join(default_extras))
